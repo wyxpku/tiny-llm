@@ -1,6 +1,6 @@
 import mlx.core as mx
 from .basics import softmax, linear
-
+import math
 
 def scaled_dot_product_attention_simple(
     query: mx.array,
@@ -9,7 +9,14 @@ def scaled_dot_product_attention_simple(
     scale: float | None = None,
     mask: mx.array | None = None,
 ) -> mx.array:
-    pass
+    key_t = mx.swapaxes(key, -1, -2)
+    ret = query @ key_t
+    if scale is None:
+        scale = 1 / math.sqrt(key.shape[-1])
+    ret = ret * scale
+    if mask is not None:
+        ret += mask
+    return mx.softmax(ret, axis=-1) @ value
 
 
 class SimpleMultiHeadAttention:
